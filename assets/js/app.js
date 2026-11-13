@@ -51,12 +51,52 @@
     catch(err){$('#tracking-result').hidden=true;$('#tracker-empty').hidden=false;input.setAttribute('aria-invalid','true');$('#tracking-help').textContent=err.message;}
   });
 
+  // Upload documents one at a time: Vercel Functions reject request bodies above 4.5 MB.
+  // Only server-authorized private Blob objects are accepted in the final request.
+  function fileAsBase64(file){
+    return new Promise((resolve,reject)=>{
+      const reader=new FileReader();
+      reader.onload=()=>resolve(String(reader.result).split(',')[1]);
+      reader.onerror=()=>reject(new Error('Could not read '+file.name));
+      reader.readAsDataURL(file);
+    });
+  }
+  async function uploadedDocuments(form,feedback){
+    const inputs=[...form.querySelectorAll('input[type="file"]')].filter(input=>!input.closest('.document-field')?.hidden&&!input.closest('[hidden]'));
+    const files=[];
+    for(const input of inputs){
+      for(const file of input.files||[]){
+        if(file.size>2*1024*1024)throw new Error(`${file.name} is too large. Maximum 2 MB per file.`);
+        files.push({field:input.name,file});
+      }
+    }
+    if(!files.length)throw new Error('Please attach the required documents.');
+    const uploaded=[];
+    for(let i=0;i<files.length;i++){
+      const {field,file}=files[i];
+      feedback.textContent=`Uploading document ${i+1} of ${files.length}: ${file.name}`;
+      const data=await api('api/document_upload.php',{
+        method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},
+        body:JSON.stringify({field,filename:file.name,mime:file.type,base64:await fileAsBase64(file)})
+      });
+      uploaded.push({field,token:data.token});
+    }
+    return uploaded;
+  }
+  function textFormFields(form){
+    const data={};for(const [key,value] of new FormData(form))if(typeof value==='string')data[key]=value;
+    return data;
+  }
   async function submitAssistanceRequest(form){
     const feedback=$('#form-feedback'), submitButton=form.querySelector('[type="submit"]');
-    const fd=new FormData(form); fd.set('consent',$('#request-consent')?.checked?'1':'0');
     submitButton.disabled=true;
     try{
-      const data=await api('api/assistance_create.php',{method:'POST',headers:{'X-CSRF-Token':csrfToken},body:fd});
+      const documents=await uploadedDocuments(form,feedback);
+      feedback.textContent='Saving your assistance request…';
+      const data=await api('api/assistance_create.php',{
+        method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},
+        body:JSON.stringify({...textFormFields(form),consent:'1',documents})
+      });
       feedback.textContent=`Request reference ${data.request.id} created. Use this ID to check its status.`;
       form.reset(); renderTracking(data.request); if($('#tracking-id'))$('#tracking-id').value=data.request.id;
       if(sessionUser?.role==='pwd')$('#request-name').value=sessionUser.full_name||'';
@@ -113,12 +153,18 @@
   oldLost?.addEventListener('change',updateDocs); updateDocs();
   idForm?.addEventListener('submit',async e=>{
     e.preventDefault(); const feedback=$('#id-form-feedback'); feedback.textContent=''; if(!idForm.reportValidity())return;
-    const fd=new FormData(idForm); fd.append('consent_confirmed',$('#id-consent')?.checked?'1':'0'); fd.append('old_pwd_id_lost',oldLost?.checked?'1':'0');
+    const button=idForm.querySelector('[type="submit"]');button.disabled=true;
     try{
-      const data=await api('api/id_application_create.php',{method:'POST',body:fd});
+      const documents=await uploadedDocuments(idForm,feedback);
+      feedback.textContent='Saving your PWD ID application…';
+      const data=await api('api/id_application_create.php',{
+        method:'POST',headers:{'Content-Type':'application/json','X-CSRF-Token':csrfToken},
+        body:JSON.stringify({...textFormFields(idForm),consent_confirmed:'1',old_pwd_id_lost:oldLost?.checked?'1':'0',documents})
+      });
       feedback.textContent=`PWD ID inquiry reference ${data.request.id} created.`; idForm.reset(); updateDocs();
       // Give the user the reference on the same page; tracker is on the portal pages.
     }catch(err){feedback.textContent=err.message;feedback.style.color='#a34e43';}
+    finally{button.disabled=false;}
   });
 
   const categoryLabels={assistance:'Assistance',programs:'Community programs',general:'General information'};

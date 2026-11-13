@@ -1,10 +1,12 @@
 import crypto from 'node:crypto';
 import mysql from 'mysql2/promise';
 import bcrypt from 'bcryptjs';
+import { put, get } from '@vercel/blob';
+import { Readable } from 'node:stream';
 
 let pool;
-const allEndpoints = new Set(['login','register','session','logout','profile','password_change','announcements','announcement_create','announcement_delete','notifications','notifications_read','my_history','track','admin_requests','admin_users','admin_assistance_details','admin_id_documents','request_status','my_request','assistance_create','id_application_create','profile_picture','document_download']);
-const disabled = new Set(['assistance_create','id_application_create','profile_picture','document_download']);
+const allEndpoints = new Set(['login','register','session','logout','profile','password_change','announcements','announcement_create','announcement_delete','notifications','notifications_read','my_history','track','admin_requests','admin_users','admin_assistance_details','admin_id_documents','request_status','my_request','assistance_create','id_application_create','profile_picture','document_download','document_upload']);
+const disabled = new Set(['profile_picture']);
 const s = v => String(v ?? '').trim();
 const random = (n=16) => crypto.randomBytes(n).toString('hex');
 const error = (message,status=400) => {let e=new Error(message);e.status=status;throw e;};
@@ -56,6 +58,53 @@ const auth = async (req,roles) => {const token=session(req);if(!token)error('Ple
 const csrf = (req,user) => {if(!user.csrf_token||req.headers['x-csrf-token']!==user.csrf_token)error('Security token expired. Refresh and try again.',403);};
 const current = u => ({user_id:u.user_id,full_name:u.full_name,email:u.email,role:u.role});
 const allowedStatus=['Received','Under review','Update available','Approved','Rejected','Closed'];
+// Each upload is a separate JSON request (<= 2 MiB) to stay below Vercel Function limits.
+// Stored objects MUST go into a PRIVATE Blob store; never expose the direct blob URL.
+const fileFields = {
+ applicationForm:'application_form',medicalCertificate:'medical_certificate',barangayCertificate:'barangay_certificate',
+ validId:'valid_id',birthOrMarriageCertificate:'birth_or_marriage_certificate',idPhotos:'id_photo',wholeBodyPhoto:'whole_body_photo',
+ oldPwdId:'old_pwd_id',affidavitOfLoss:'affidavit_of_loss',assistancePwdId:'assistance_pwd_id',
+ disabilityPhoto:'assistance_disability_photo',assistanceMedicalCertificate:'assistance_medical_certificate'
+};
+const MAX_UPLOAD=2*1024*1024;
+const validDocument = (buffer,mime) => {
+ const jpg=buffer.length>=3 && buffer[0]===0xff&&buffer[1]===0xd8&&buffer[2]===0xff;
+ const png=buffer.length>=8 && buffer.subarray(0,8).equals(Buffer.from([137,80,78,71,13,10,26,10]));
+ const pdf=buffer.length>=5 && buffer.subarray(0,5).toString()==='%PDF-';
+ return (mime==='image/jpeg'&&jpg)||(mime==='image/png'&&png)||(mime==='application/pdf'&&pdf);
+};
+const parseDocTokens=(docs,uid,category,type,lost) => {
+ if(!Array.isArray(docs)||docs.length>18)error('Invalid document list (maximum 18 files).',422);
+ const allowed=category==='assistance'?['assistancePwdId','disabilityPhoto','assistanceMedicalCertificate']:
+ ['applicationForm','medicalCertificate','barangayCertificate','validId','birthOrMarriageCertificate','idPhotos','wholeBodyPhoto','oldPwdId','affidavitOfLoss'];
+ const result=[];
+ for(const doc of docs){
+  const field=s(doc?.field),token=s(doc?.token);
+  if(!allowed.includes(field))error('Invalid document category.',422);
+  const payload=verify(token);
+  if(!payload||payload.kind!=='staged_doc'||payload.uid!==uid||payload.field!==field||!payload.pathname?.startsWith(`egabay/${uid}/`))error('Invalid or expired uploaded document. Please upload it again.',422);
+  if(result.some(x=>x.pathname===payload.pathname))error('Repeated uploaded document.',422);
+  result.push(payload);
+ }
+ const mandatory=category==='assistance'?['assistancePwdId','disabilityPhoto','assistanceMedicalCertificate']:
+ type==='new'?['applicationForm','medicalCertificate','barangayCertificate','validId','idPhotos']:
+ type==='renewal'?['applicationForm','medicalCertificate','barangayCertificate','validId','idPhotos',lost?'affidavitOfLoss':'oldPwdId']:
+ ['applicationForm','medicalCertificate','barangayCertificate','validId','idPhotos','affidavitOfLoss'];
+ for(const field of mandatory)if(!result.some(x=>x.field===field))error(`Missing required document: ${field}.`,422);
+ if(category==='pwd_id'){
+  if(type==='new'&&result.some(x=>['oldPwdId','affidavitOfLoss'].includes(x.field)))error('Document does not match application type.',422);
+  if(type==='renewal'&&result.some(x=>lost?x.field==='oldPwdId':x.field==='affidavitOfLoss'))error('Old ID and loss declaration conflict.',422);
+ }
+ return result;
+};
+const saveDocuments=async (db,requestId,docs)=>{
+ for(const doc of docs){
+  await query('INSERT INTO application_documents(request_id,document_type,original_file_name,stored_file_name,file_path,mime_type,file_size_bytes) VALUES(?,?,?,?,?,?,?)',
+  [requestId,fileFields[doc.field],doc.filename,doc.pathname,'blob:'+doc.pathname,doc.mime,doc.size],db);
+ }
+};
+const requestResponse=(reference,type,municipality,status='Received')=>({id:reference,type,municipality,status,explanation:null});
+const requestReference=()=>`EG-${Date.now().toString(36).toUpperCase()}-${random(4).toUpperCase()}`;
 const municipalities=['Boac','Mogpog','Gasan','Buenavista','Santa Cruz','Torrijos'];
 const municipalId = async name => {if(!s(name))return null;return (await first('SELECT municipality_id FROM municipalities WHERE municipality_name=?',[s(name)]))?.municipality_id||null;};
 const validateProfile = async d => {
@@ -227,6 +276,63 @@ async function route(endpoint,req,res,params){
   await trans(async db=>{await query('UPDATE users SET full_name=?,email=?,contact_number=? WHERE user_id=?',[f.full,f.email,f.contact||null,id],db);await saveProfile(id,f,db);await audit(actor.user_id,'admin_profile_update','user',id,null,db);});
   return {success:true,message:'Account details updated.'};
  }
+ if(endpoint==='document_upload'){
+  requireMethod(req,'POST');csrf(req,user);
+  if(!['pwd','caregiver'].includes(user.role))error('Only PWD and caregiver accounts may upload documents.',403);
+  const field=s(d.field),filename=s(d.filename).replace(/[\\/\x00-\x1f]/g,'_').slice(0,180);
+  const mime=s(d.mime),data=s(d.base64);
+  if(!fileFields[field]||!filename||!['application/pdf','image/jpeg','image/png'].includes(mime))error('Only PDF, JPG or PNG documents are allowed.',422);
+ if(['idPhotos','wholeBodyPhoto','disabilityPhoto'].includes(field) && !['image/jpeg','image/png'].includes(mime))error('This field requires a JPG or PNG image.',422);
+  if(data.length>Math.ceil(MAX_UPLOAD*4/3)+16||!data||!/^[A-Za-z0-9+/]+={0,2}$/.test(data))error('File must be a valid PDF, JPG or PNG under 2 MB.',413);
+  const contents=Buffer.from(data,'base64');
+  if(!contents.length||contents.length>MAX_UPLOAD||!validDocument(contents,mime))error('File content does not match its format.',422);
+  const pathname=`egabay/${user.user_id}/${random(16)}/${filename.replace(/[^a-zA-Z0-9._-]/g,'_')}`;
+  const blob=await put(pathname,contents,{access:'private',contentType:mime,addRandomSuffix:false});
+  const token=sign({uid:user.user_id,kind:'staged_doc',field,filename,mime,size:contents.length,pathname:blob.pathname,exp:Date.now()+60*60*1000});
+  return {success:true,token,filename};
+ }
+ if(endpoint==='assistance_create'||endpoint==='id_application_create'){
+  requireMethod(req,'POST');csrf(req,user);
+  if(!['pwd','caregiver'].includes(user.role))error('Only PWD and caregiver accounts can submit requests.',403);
+  const category=endpoint==='assistance_create'?'assistance':'pwd_id';
+  const name=s(d.name),type=s(d.type),consent=String(d.consent_confirmed||d.consent)==='1';
+  if(!name||name.length>150||!consent)error('Enter applicant name and confirm consent.',422);
+  const location=s(d.location),details=s(d.details),municipality=s(d.municipality),lost=String(d.old_pwd_id_lost)==='1';
+  if(category==='assistance'&&(!['Medicine support','Food assistance','Transportation','Other support'].includes(type)||!location||location.length>255||!details||details.length>10000))error('Complete assistance request information.',422);
+  if(category==='pwd_id'&&!['new','renewal','replacement'].includes(type))error('Choose a valid ID application type.',422);
+  const mid=category==='pwd_id'?await municipalId(municipality):null;
+  if(category==='pwd_id'&&!mid)error('Choose a valid municipality.',422);
+  const docs=parseDocTokens(d.documents,user.user_id,category,type,lost);
+  const reference=requestReference();
+  await trans(async db=>{
+   const newRequest=await query('INSERT INTO service_requests(reference_code,request_category,request_type,applicant_name,applicant_user_id,submitted_by_user_id,municipality_id,location_text,consent_confirmed) VALUES(?,?,?,?,?,?,?,?,1)',
+   [reference,category,category==='assistance'?type:(type==='new'?'New PWD ID':type==='renewal'?'PWD ID renewal':'Lost PWD ID replacement'),name,user.role==='pwd'?user.user_id:null,user.user_id,mid,category==='assistance'?location:municipality],db);
+   const id=newRequest.insertId;
+   if(category==='assistance')await query('INSERT INTO assistance_request_details(request_id,assistance_type,details) VALUES(?,?,?)',[id,type,details],db);
+   else await query('INSERT INTO pwd_id_application_details(request_id,application_type,old_pwd_id_lost) VALUES(?,?,?)',[id,type,lost?1:0],db);
+   await saveDocuments(db,id,docs);
+   await query('INSERT INTO request_status_history(request_id,new_status,note,changed_by_user_id) VALUES(?,?,?,?)',[id,'Received','Request submitted.',user.user_id],db);
+   await query("INSERT INTO notifications(title,message,notification_type,recipient_user_id,related_request_id) VALUES(?,?,'request',?,?)",['Request received: '+reference,'Your request has been received for review.',user.user_id,id],db);
+   await audit(user.user_id,'create','service_request',id,{reference,category,documents:docs.length},db);
+  });
+  return {success:true,message:'Request submitted successfully.',request:requestResponse(reference,category==='assistance'?type:'PWD ID '+type,category==='assistance'?location:municipality)};
+ }
+ if(endpoint==='document_download'){
+  requireMethod(req,'GET');const id=Number(params.get('id')),mode=s(params.get('mode'));
+  if(!Number.isSafeInteger(id)||id<1)error('Invalid document ID.',422);
+  const doc=await first('SELECT d.file_path,d.original_file_name,d.mime_type,s.applicant_user_id,s.submitted_by_user_id FROM application_documents d JOIN service_requests s ON d.request_id=s.request_id WHERE d.document_id=?',[id]);
+  if(!doc)error('Document not found.',404);
+  if(!['staff','admin'].includes(user.role)&&Number(doc.applicant_user_id)!==user.user_id&&Number(doc.submitted_by_user_id)!==user.user_id)error('You cannot access this document.',403);
+  if(!doc.file_path.startsWith('blob:'))error('Legacy document has no migrated storage file.',404);
+  const result=await get(doc.file_path.slice(5),{access:'private'});
+  if(!result||result.statusCode!==200||!result.stream)error('Stored document not found.',404);
+  res.statusCode=200;res.setHeader('Content-Type',doc.mime_type);res.setHeader('X-Content-Type-Options','nosniff');
+  res.setHeader('Cache-Control','private, no-store');
+  const clean=doc.original_file_name.replace(/[\r\n\"\\]/g,'_');
+  res.setHeader('Content-Disposition',`${mode==='download'?'attachment':'inline'}; filename="${clean}"`);
+  await new Promise((resolve,reject)=>{Readable.fromWeb(result.stream).on('error',reject).pipe(res).on('finish',resolve).on('error',reject);});
+  res._egabayStreamed=true;return null;
+ }
  if(endpoint==='request_status'){
   requireMethod(req,'POST');const actor=await auth(req,['staff','admin']);csrf(req,actor);
   const ref=s(d.reference).toUpperCase(),status=s(d.status),reason=s(d.reason);if(!ref||!allowedStatus.includes(status))error('Invalid status update.',422);if(reason.length>400||(status==='Approved'||status==='Rejected')&&!reason)error('A valid reason is required.',422);
@@ -247,7 +353,7 @@ export default async function handler(req,res){
   const url=new URL(req.url,'https://localhost');const endpoint=s(url.searchParams.get('endpoint'));
   if(!allEndpoints.has(endpoint))error('Unknown API endpoint.',404);
   const result=await route(endpoint,req,res,url.searchParams);
-  res.status(200).json(result);
+  if (!res._egabayStreamed) res.status(200).json(result);
  }catch(e){
   const status=e.status||(e.code==='ER_DUP_ENTRY'?409:500);
   if(status>=500)console.error('API error',e.code||e.name,e.message);
