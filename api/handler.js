@@ -9,11 +9,36 @@ const s = v => String(v ?? '').trim();
 const random = (n=16) => crypto.randomBytes(n).toString('hex');
 const error = (message,status=400) => {let e=new Error(message);e.status=status;throw e;};
 const requireMethod = (req,method) => {if(req.method!==method)error('Method not allowed.',405);};
+// Railway MySQL can present a private/self-signed CA. Trust the actual CA
+// instead of globally disabling TLS verification (which exposes PWD data).
+const tlsOptions = () => {
+ const enabled = String(process.env.DB_SSL || '').toLowerCase() === 'true';
+ if (!enabled) return undefined;
+ const raw = process.env.DB_SSL_CA || '';
+ const encoded = process.env.DB_SSL_CA_BASE64 || '';
+ if (raw && encoded) error('Set only one of DB_SSL_CA or DB_SSL_CA_BASE64.', 503);
+ let ca;
+ if (encoded) {
+  try { ca = Buffer.from(encoded.replace(/\s/g, ''), 'base64').toString('utf8'); }
+  catch { error('DB_SSL_CA_BASE64 is invalid.', 503); }
+ } else if (raw) ca = raw.replace(/\\n/g, '\n');
+ if (ca && (!ca.includes('-----BEGIN CERTIFICATE-----') || !ca.includes('-----END CERTIFICATE-----'))) {
+  error('Database CA must be a PEM certificate.', 503);
+ }
+ // Never set rejectUnauthorized:false or disable Node's TLS verification.
+ return {minVersion: 'TLSv1.2', rejectUnauthorized: true, ...(ca ? {ca} : {})};
+};
 const connection = () => {
- if(!pool) {
-  const {DB_HOST,DB_USER,DB_NAME,DB_PASS,DB_PORT,DB_SSL}=process.env;
-  if(!DB_HOST||!DB_USER||!DB_NAME||DB_PASS===undefined)error('Database is not configured.',503);
-  pool=mysql.createPool({host:DB_HOST,user:DB_USER,password:DB_PASS,database:DB_NAME,port:Number(DB_PORT||3306),waitForConnections:true,connectionLimit:4,queueLimit:50,ssl:DB_SSL==='true'?{minVersion:'TLSv1.2'}:undefined,dateStrings:true});
+ if (!pool) {
+  const {DB_HOST,DB_USER,DB_NAME,DB_PASS,DB_PORT}=process.env;
+  if (!DB_HOST || !DB_USER || !DB_NAME || DB_PASS===undefined) error('Database is not configured.',503);
+  const port=Number(DB_PORT || 3306);
+  if (!Number.isInteger(port) || port < 1 || port > 65535) error('Database port is invalid.',503);
+  pool=mysql.createPool({
+   host:DB_HOST,user:DB_USER,password:DB_PASS,database:DB_NAME,port,
+   waitForConnections:true,connectionLimit:4,queueLimit:50,
+   ssl:tlsOptions(),dateStrings:true
+  });
  }
  return pool;
 };
