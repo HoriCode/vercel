@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2E3192">
+  <meta name="description" content="Manage registered users in the e-Gabay PWD admin portal.">
+  <title>Users — e-Gabay Marinduque Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+</head>
+<body class="portal-page staff-page">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header"><nav class="navbar" aria-label="Main navigation"><div class="container">
+    <a class="navbar-brand brand-lockup" href="admin.html" aria-label="Admin dashboard"><span class="brand-mark" aria-hidden="true"><span>e</span></span><span class="brand-text">e-Gabay <span>PWD</span><small>MARINDUQUE</small></span></a>
+    <div class="portal-nav-links"><span class="portal-role-label">ADMIN PORTAL</span><a href="profile.html">My profile</a><a href="login.html">Switch account</a></div>
+  </div></nav></header>
+  <main id="main-content" class="portal-main container">
+    <aside class="admin-sidebar" aria-label="Admin navigation"><span class="admin-sidebar-label">WORKSPACE</span><nav>
+      <a class="admin-sidebar-link" href="admin.html"><span aria-hidden="true">⌂</span> Overview</a>
+      <a class="admin-sidebar-link active" href="admin-users.html" aria-current="page">Users</a>
+      <a class="admin-sidebar-link" href="admin-requests.html"><span aria-hidden="true">▤</span> Assistance requests</a>
+      <a class="admin-sidebar-link" href="admin-id-requests.html"><span class="admin-id-icon" aria-hidden="true"><svg class="admin-id-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M6 16c.5-1.5 3.5-1.5 4 0M13 10h5M13 14h5"/></svg></span> ID applications</a>
+      <a class="admin-sidebar-link" href="admin-announcement-create.html"><span aria-hidden="true">＋</span> Add announcement</a>
+      <a class="admin-sidebar-link" href="admin-announcements.html"><span aria-hidden="true">i</span> Community notices</a>
+    </nav><p class="admin-sidebar-note">Manage requests and share updates with your community.</p></aside>
+    <div class="admin-content">
+      <section class="portal-hero staff-hero"><div class="eyebrow"><span class="eyebrow-line"></span> USER MANAGEMENT</div><h1>Registered <span>users.</span></h1><p class="portal-intro">Find a user account, review its details and documents, and make authorized changes.</p></section>
+      <section class="admin-panel" id="admin-users-panel">
+        <div class="admin-panel-heading"><div><span class="card-kicker">USER MANAGEMENT</span><h2>Registered users</h2></div></div>
+        <form id="admin-user-filter" class="row g-2 mb-3">
+          <div class="col-md-4"><label for="user-query" class="form-label">Name or email</label><input id="user-query" class="form-control" placeholder="Search users"></div>
+          <div class="col-md-3"><label for="user-municipality" class="form-label">Municipality</label><select id="user-municipality" class="form-select"><option value="">All municipalities</option><option>Boac</option><option>Mogpog</option><option>Gasan</option><option>Buenavista</option><option>Santa Cruz</option><option>Torrijos</option></select></div>
+          <div class="col-md-3"><label for="user-barangay" class="form-label">Barangay</label><input id="user-barangay" class="form-control" placeholder="Any barangay"></div>
+          <div class="col-md-2 align-self-end"><button class="btn btn-primary w-100" type="submit">Search</button></div>
+        </form>
+        <div class="table-responsive"><table class="table"><thead><tr><th>User</th><th>Role</th><th>Municipality</th><th>Barangay</th><th>Action</th></tr></thead><tbody id="admin-user-results"></tbody></table></div>
+        <div id="admin-user-details" class="admin-user-details" hidden><h3 class="h5 mt-3">User details <span id="admin-user-role" class="small text-muted"></span></h3><form id="admin-user-edit" class="row g-3"></form><h4 class="h6 mt-4">Uploaded Documents</h4><div id="admin-user-docs" aria-live="polite"></div></div>
+        <p id="admin-users-feedback" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+  <script src="assets/js/app.js"></script>
+  <script src="assets/js/admin-users.js?v=assistance-documents-1"></script>
+</body>
+</html>

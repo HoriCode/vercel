@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 230" fill="none">
+  <title>PWD self-service guide</title>
+  <path d="M68 29c48-28 146-24 189 15 37 34 39 111 9 149-35 45-137 40-202 13-65-27-55-144 4-177Z" fill="#DDF1F8" fill-opacity=".78"/>
+  <rect x="177" y="41" width="87" height="119" rx="13" fill="#fff" stroke="#A8D7E8" stroke-width="4"/>
+  <path d="M196 68h48M196 84h36" stroke="#0077B6" stroke-linecap="round" stroke-width="6"/>
+  <rect x="194" y="101" width="13" height="13" rx="4" fill="#D9545D"/>
+  <path d="m197 107 3 3 5-6M216 108h28" stroke="#fff" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"/>
+  <rect x="194" y="126" width="13" height="13" rx="4" fill="#F5B65B"/>
+  <path d="M216 133h25" stroke="#A8D7E8" stroke-linecap="round" stroke-width="5"/>
+  <circle cx="112" cy="82" r="25" fill="#9B604A"/>
+  <path d="M88 81c2-24 16-37 37-36 15 1 25 12 27 30-10-8-20-12-31-12-11 0-22 7-33 18Z" fill="#183B56"/>
+  <path d="M75 143c0-23 18-41 41-41s41 18 41 41v45H75v-45Z" fill="#0077B6"/>
+  <path d="m82 185-11 26m53-26 13 26" stroke="#183B56" stroke-linecap="round" stroke-width="14"/>
+  <circle cx="211" cy="184" r="17" fill="#fff" stroke="#0077B6" stroke-width="5"/>
+  <path d="M211 167v34m-17-17h34" stroke="#0077B6" stroke-linecap="round" stroke-width="3"/>
+  <circle cx="70" cy="63" r="5" fill="#F5B65B"/>
+</svg>

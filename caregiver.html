@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2E3192">
+  <meta name="description" content="Caregiver guidance and assistance portal for Marinduque.">
+  <title>Caregiver portal — e-Gabay Marinduque</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+</head>
+<body class="portal-page caregiver-page">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
+    <nav class="navbar" aria-label="Main navigation">
+      <div class="container">
+        <a class="navbar-brand brand-lockup" href="caregiver.html" aria-label="Caregiver portal">
+          <span class="brand-mark" aria-hidden="true"><span>e</span></span>
+          <span class="brand-text">e-Gabay <span>PWD</span><small>MARINDUQUE</small></span>
+        </a>
+        <div class="portal-nav-links">
+          <span class="portal-role-label">CAREGIVER PORTAL</span>
+          <div class="portal-section-links" aria-label="Portal sections">
+            <a href="#assistance">Assistance</a>
+            <a href="#tracking-card">Track reference</a>
+            <a href="#pwd-forms">PWD ID forms</a>
+            <a href="#caregiver-guide">Step-by-step guide</a>
+            <a href="#updates">Community updates</a>
+          </div>
+          <div class="notification-center">
+            <button class="notification-toggle" id="notification-toggle" type="button" aria-label="Notifications" aria-controls="notification-panel" aria-expanded="false">
+              <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4"/></svg>
+              <span>Notifications</span><span class="notification-count" id="notification-count" hidden></span>
+            </button>
+            <section class="notification-panel" id="notification-panel" aria-label="Notifications" hidden>
+              <div class="notification-panel-heading"><h2>Notifications</h2><button class="notification-close" id="notification-close" type="button" aria-label="Close notifications">×</button></div>
+              <p class="notification-feedback" id="notification-feedback" role="status" aria-live="polite"></p>
+              <div class="notification-items" id="notification-items" aria-live="polite"></div>
+            </section>
+          </div>
+          <a href="profile.html">My profile</a>
+          <a href="login.html">Switch account</a>
+        </div>
+      </div>
+    </nav>
+  </header>
+  <main id="main-content" class="portal-main container">
+    <section class="portal-hero">
+      <div class="eyebrow"><span class="eyebrow-line"></span> Support for caregivers</div>
+      <h1>Support someone you <span>care about.</span></h1>
+      <p class="portal-intro">Request general assistance with the person’s consent, check a request reference, and find community guidance.</p>
+    </section>
+    <section class="section-pad assistance-section role-content-section" id="assistance">
+      <div class="section-heading assistance-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> We’re here to help you navigate</div><h2>Request <span>assistance.</span></h2></div>
+        <p>Share only the information needed to create and identify the assistance request.</p>
+      </div>
+      <div class="row g-4 align-items-stretch justify-content-center">
+        <div class="col-lg-8">
+          <div class="request-card">
+            <div class="card-title-row"><div><span class="card-kicker">CAREGIVER ASSISTANCE</span><h3>Request assistance</h3></div><span class="card-icon" aria-hidden="true">＋</span></div>
+            <div id="caregiver-context" class="context-note">Please submit this request on behalf of the person you support, with their consent.</div>
+            <form id="assistance-form" novalidate>
+              <div class="row g-3">
+                <div class="col-sm-6"><label class="form-label" for="request-name">Patient’s name</label><input class="form-control" id="request-name" name="name" autocomplete="off" maxlength="150" required placeholder="e.g. Ana Dela Cruz"></div>
+                <div class="col-sm-6"><label class="form-label" for="request-type">Type of assistance</label><select class="form-select" id="request-type" name="type" required><option value="">Choose one</option><option>Medicine support</option><option>Food assistance</option><option>Transportation</option><option>Other support</option></select></div>
+                <div class="col-12"><label class="form-label" for="request-location">Municipality / barangay</label><input class="form-control" id="request-location" name="location" maxlength="255" required placeholder="e.g. Boac, Barangay Isok I"></div>
+                <div class="col-12"><label class="form-label" for="request-details">How can we help?</label><textarea class="form-control" id="request-details" name="details" rows="3" maxlength="10000" required placeholder="Describe the assistance needed."></textarea></div>
+                <div class="col-12 assistance-upload-section">
+                  <h4 class="document-upload-heading">Required supporting documents</h4>
+                  <p class="assistance-upload-note">Upload a PDF, JPG, or PNG (up to 5 MB) for each document. The disability photo must be JPG or PNG. Files are visible only to the linked account and authorized staff.</p>
+                  <div class="row g-3">
+                    <div class="col-md-4"><label class="form-label" for="assistance-pwd-id">PWD ID</label><input class="form-control" id="assistance-pwd-id" name="assistancePwdId" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required></div>
+                    <div class="col-md-4"><label class="form-label" for="assistance-disability-photo">Photo of disability</label><input class="form-control" id="assistance-disability-photo" name="disabilityPhoto" type="file" accept=".jpg,.jpeg,.png,image/jpeg,image/png" required></div>
+                    <div class="col-md-4"><label class="form-label" for="assistance-medical-certificate">Updated medical certificate from a qualified specialist</label><input class="form-control" id="assistance-medical-certificate" name="assistanceMedicalCertificate" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" required></div>
+                  </div>
+                </div>
+                <div class="col-12 form-consent"><input class="form-check-input" id="request-consent" type="checkbox" required><label class="form-check-label" for="request-consent">I have consent to create this request on the person’s behalf.</label></div>
+                <div class="col-12"><button class="btn btn-primary" type="submit">Create request reference <span aria-hidden="true">→</span></button></div>
+              </div>
+            </form>
+            <div class="form-feedback" id="form-feedback" role="status" aria-live="polite"></div>
+          </div>
+        </div>
+      </div>
+      <div class="disclaimer"><strong>Privacy</strong><span>Share only the information needed to identify the request. Assistance eligibility is determined through the applicable program review.</span></div>
+    </section>
+    <section class="section-pad role-content-section" id="pwd-forms" aria-labelledby="pwd-forms-heading">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> PWD ID document preparation</div><h2 id="pwd-forms-heading">Choose an application <span>form.</span></h2></div>
+        <p>Open the form that matches the person’s PWD ID request.</p>
+      </div>
+      <div class="row g-3">
+        <div class="col-md-4"><a class="portal-card d-block h-100 text-decoration-none" href="firsttime-applicant.html"><h3>New PWD ID application</h3><p>Prepare documents for a first-time application.</p><span class="text-link">Open application form →</span></a></div>
+        <div class="col-md-4"><a class="portal-card d-block h-100 text-decoration-none" href="pwd-renewal.html"><h3>PWD ID renewal</h3><p>Prepare renewal documents, including the old ID or loss information.</p><span class="text-link">Open renewal form →</span></a></div>
+        <div class="col-md-4"><a class="portal-card d-block h-100 text-decoration-none" href="lost-pwd-id.html"><h3>Lost PWD ID</h3><p>Prepare a replacement inquiry and Affidavit of Loss.</p><span class="text-link">Open lost ID form →</span></a></div>
+      </div>
+    </section>
+    <section class="section-pad role-content-section tracker-section" aria-label="Request tracker">
+      <div class="tracking-card" id="tracking-card">
+        <div class="card-title-row"><div><span class="card-kicker">REQUEST &amp; APPLICATION TRACKER</span><h3>Check a request or application</h3></div><span class="card-icon" aria-hidden="true">⌕</span></div>
+        <p class="tracking-intro">Enter the reference ID from an assistance request or PWD ID application.</p>
+        <form id="tracking-form" class="tracking-form"><label class="visually-hidden" for="tracking-id">Request or application reference ID</label><input class="form-control" id="tracking-id" placeholder="Enter your reference ID" aria-describedby="tracking-help"><button class="btn btn-dark" type="submit">Look up</button></form>
+        <small class="tracking-help" id="tracking-help">Enter a reference ID to view its recorded status. This tracker supports assistance requests, first-time applications, renewals, and lost-ID inquiries.</small>
+        <div id="tracking-result" class="tracking-result" aria-live="polite">
+          <div class="tracked-request"><div><span class="request-ref">EG-2048</span><span class="request-type">Medicine support</span></div><span class="status-badge status-review"><i></i> Under review</span></div>
+          <div class="request-progress"><span class="progress-done"></span><span class="progress-done"></span><span></span><span></span></div>
+          <div class="tracking-step-labels"><span>Received</span><span>In review</span><span>Update</span><span>Closed</span></div>
+          <p class="status-explanation">This request is awaiting a review update.</p>
+        </div>
+        <div class="tracker-empty" id="tracker-empty" hidden role="status">No request or application matched that reference ID. Check the ID from your confirmation and try again.</div>
+        <a class="btn btn-outline-primary mt-3" href="profile.html#history-heading">View all my requests</a>
+      </div>
+    </section>
+    <section class="section-pad services-section role-content-section" id="caregiver-guide">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> Caregiver guide</div><h2>Support the application, <span>step by step.</span></h2></div>
+        <p>Use this checklist to help prepare the person’s PWD ID application.</p>
+      </div>
+      <div class="row g-4">
+        <div class="col-lg-7">
+          <div class="info-card requirements-card">
+            <div class="card-title-row"><div><span class="card-kicker">DOCUMENT CHECKLIST</span><h3>What to prepare</h3></div><span class="card-icon" aria-hidden="true">✓</span></div>
+            <ul class="check-list">
+              <li><span aria-hidden="true">✓</span><div><strong>Proof of disability</strong><small>Medical certificate or disability assessment from a licensed specialist.</small></div></li>
+              <li><span aria-hidden="true">✓</span><div><strong>Proof of identity and residence</strong><small>Valid ID and barangay certificate or other proof of local residence.</small></div></li>
+              <li><span aria-hidden="true">✓</span><div><strong>Recent ID photos</strong><small>Prepare the required ID photos.</small></div></li>
+              <li><span aria-hidden="true">✓</span><div><strong>Completed application form</strong><small>Choose the form that matches the person’s request.</small></div></li>
+            </ul>
+            <p class="fine-print">Keep the documents together so they are easy to review.</p>
+          </div>
+        </div>
+        <div class="col-lg-5">
+          <div class="process-card">
+            <span class="card-kicker">A SIMPLE CHECKLIST</span><h3>How the process works</h3>
+            <ol class="step-list">
+              <li><span class="step-number">01</span><div><strong>Gather the documents</strong><small>Prepare the requirements listed here with the person you support.</small></div></li>
+              <li><span class="step-number">02</span><div><strong>Choose an application form</strong><small>Open the first-time, renewal, or lost-ID form as needed.</small></div></li>
+              <li><span class="step-number">03</span><div><strong>Keep the reference ID</strong><small>Use the ID created by the form when checking the inquiry status.</small></div></li>
+            </ol>
+            <a class="btn btn-outline-primary btn-sm" href="#pwd-forms">Choose a form <span aria-hidden="true">→</span></a>
+            <p class="fine-print mb-0">Help the person you support keep their documents and reference ID together.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <section class="section-pad updates-section role-content-section" id="updates">
+      <div class="section-heading">
+        <div><div class="eyebrow"><span class="eyebrow-line"></span> From around the community</div><h2>A little good <span>news.</span></h2></div>
+        <p>Browse community programs, services, and upcoming events.</p>
+      </div>
+      <div class="row g-4" id="announcement-list" aria-live="polite" aria-label="Community announcements"></div>
+      <p class="announcement-empty admin-footnote" id="announcement-empty" hidden>No announcements have been added yet.</p>
+      <div class="notice-strip"><span class="notice-symbol" aria-hidden="true">i</span><p><strong>Community programs:</strong> Explore the announcements for event dates, places, and service information.</p></div>
+    </section>
+    
+  </main>
+  <div class="status-confirm-backdrop switch-account-backdrop" id="switch-account-modal" hidden>
+    <section class="status-confirm-dialog switch-account-dialog" role="dialog" aria-modal="true" aria-labelledby="switch-account-title" aria-describedby="switch-account-message">
+      <span class="card-kicker">ACCOUNT</span>
+      <h2 id="switch-account-title">Switch accounts?</h2>
+      <p id="switch-account-message">You’ll return to the sign-in page, where you can choose a different portal.</p>
+      <div class="status-confirm-actions">
+        <button class="btn btn-outline-primary" id="switch-account-cancel" type="button">Stay here</button>
+        <button class="btn btn-primary" id="switch-account-confirm" type="button">Continue</button>
+      </div>
+    </section>
+  </div>
+  <div class="status-confirm-backdrop assistance-confirm-backdrop" id="assistance-confirm-modal" hidden>
+    <section class="status-confirm-dialog assistance-confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="assistance-confirm-title" aria-describedby="assistance-confirm-message">
+      <span class="card-kicker">REQUEST CONFIRMATION</span>
+      <h2 id="assistance-confirm-title">Submit assistance request?</h2>
+      <p id="assistance-confirm-message">Your assistance request and required supporting documents will be sent for review. Do you want to continue?</p>
+      <div class="status-confirm-actions">
+        <button class="btn btn-outline-primary" id="assistance-confirm-cancel" type="button">Go back</button>
+        <button class="btn btn-primary" id="assistance-confirm-continue" type="button">Yes, submit request</button>
+      </div>
+    </section>
+  </div>
+  <script src="assets/js/app.js?v=status-notification-1"></script>
+</body>
+</html>

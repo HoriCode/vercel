@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 230" fill="none">
+  <title>Community support staff workspace</title>
+  <path d="M51 47c42-40 141-39 195-5 53 33 51 115 18 153-39 44-157 35-207 1C8 161 14 83 51 47Z" fill="#E5F3F8" fill-opacity=".88"/>
+  <rect x="178" y="47" width="76" height="63" rx="10" fill="#fff" stroke="#A8D7E8" stroke-width="4"/>
+  <path d="M194 92V77m14 15V64m14 28V71m14 21V57" stroke="#0077B6" stroke-linecap="round" stroke-width="7"/>
+  <circle cx="111" cy="77" r="24" fill="#9B604A"/>
+  <path d="M87 76c2-23 16-36 37-35 15 1 24 12 26 29-10-7-19-11-30-11-12 0-22 6-33 17Z" fill="#183B56"/>
+  <path d="M74 135c0-22 17-39 39-39s39 17 39 39v47H74v-47Z" fill="#36A0C8"/>
+  <path d="m84 181-9 24m50-24 10 24" stroke="#183B56" stroke-linecap="round" stroke-width="13"/>
+  <rect x="55" y="156" width="214" height="14" rx="7" fill="#234F6A"/>
+  <path d="M81 171v28m168-28v28" stroke="#234F6A" stroke-linecap="round" stroke-width="9"/>
+  <rect x="171" y="128" width="65" height="34" rx="5" fill="#183B56"/>
+  <path d="M178 135h51v20h-51z" fill="#DDF1F8"/>
+  <circle cx="204" cy="145" r="4" fill="#0077B6"/>
+  <path d="M47 103c9-8 18-8 27 0m-32-12c12-12 25-12 37 0" stroke="#F5B65B" stroke-linecap="round" stroke-width="4"/>
+</svg>

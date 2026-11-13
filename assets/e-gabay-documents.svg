@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 230" fill="none">
+  <title>Application documents ready for review</title>
+  <path d="M57 44c47-37 152-35 201 2 45 34 45 111 9 151-41 45-158 34-208-2C12 158 15 77 57 44Z" fill="#E5F3F8" fill-opacity=".9"/>
+  <path d="M82 79a13 13 0 0 1 13-13h75l17 18h42a13 13 0 0 1 13 13v73a13 13 0 0 1-13 13H95a13 13 0 0 1-13-13V79Z" fill="#F5B65B"/>
+  <rect x="111" y="67" width="111" height="105" rx="10" transform="rotate(-7 111 67)" fill="#fff" stroke="#A8D7E8" stroke-width="4"/>
+  <path d="m134 103 8 8 15-19m-17 42 8 8 15-19" stroke="#0077B6" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+  <path d="m171 101 29-4m-24 43 29-4" stroke="#A8D7E8" stroke-linecap="round" stroke-width="6"/>
+  <path d="m235 133 25 25m-22-31 6-6a8 8 0 0 1 11 0l11 11a8 8 0 0 1 0 11l-6 6" stroke="#D9545D" stroke-linecap="round" stroke-linejoin="round" stroke-width="6"/>
+  <circle cx="69" cy="63" r="5" fill="#0077B6"/>
+  <path d="M254 67v18m-9-9h18" stroke="#D9545D" stroke-linecap="round" stroke-width="4"/>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 230" fill="none">
+  <title>Sharing helpful community announcements</title>
+  <path d="M58 48c43-40 146-42 198-6 53 36 50 114 14 153-41 43-151 34-204 0C11 163 16 87 58 48Z" fill="#FFF2DF" fill-opacity=".85"/>
+  <path d="M83 106h37l83-36v92l-83-36H83v-20Z" fill="#0077B6"/>
+  <path d="m108 128 15 43h26l-22-47" fill="#36A0C8"/>
+  <path d="M206 88c17 10 17 45 0 56" stroke="#D9545D" stroke-linecap="round" stroke-width="8"/>
+  <path d="M229 73c30 22 30 67 0 89" stroke="#F5B65B" stroke-linecap="round" stroke-width="6"/>
+  <rect x="61" y="62" width="63" height="21" rx="10.5" fill="#fff" stroke="#A8D7E8" stroke-width="3"/>
+  <path d="M74 73h34" stroke="#0077B6" stroke-linecap="round" stroke-width="4"/>
+  <circle cx="82" cy="187" r="5" fill="#D9545D"/>
+  <path d="M264 167v18m-9-9h18" stroke="#0077B6" stroke-linecap="round" stroke-width="4"/>
+</svg>

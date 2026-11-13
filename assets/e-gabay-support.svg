@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 360" fill="none">
+  <title>Community members supporting one another</title>
+  <desc>A PWD and caregiver share a welcoming moment in a bright community setting.</desc>
+  <defs>
+    <linearGradient id="scene" x1="62" y1="22" x2="412" y2="340" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#EAF7FC"/>
+      <stop offset="1" stop-color="#D9EFF8"/>
+    </linearGradient>
+    <linearGradient id="shirt" x1="284" y1="122" x2="340" y2="255" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#36A0C8"/>
+      <stop offset="1" stop-color="#0878A9"/>
+    </linearGradient>
+  </defs>
+  <path d="M75 41c55-43 139-22 187 4 54 29 123 31 153 85 34 61-1 157-64 190-63 33-141 16-213 5C62 311 23 257 30 180c5-56 5-105 45-139Z" fill="url(#scene)"/>
+  <circle cx="361" cy="82" r="30" fill="#F5B65B" fill-opacity=".72"/>
+  <path d="M52 279c62-32 119-24 177-12 60 12 111 22 199-13v61H52v-36Z" fill="#BDE3F0"/>
+  <path d="M67 298c67-18 126-9 183 2 53 10 109 9 170-9" stroke="#8AC7DD" stroke-linecap="round" stroke-width="4" opacity=".8"/>
+  <path d="M109 166c0-22 17-39 39-39s39 17 39 39v87h-78v-87Z" fill="#F5B65B"/>
+  <circle cx="148" cy="111" r="26" fill="#A8654F"/>
+  <path d="M121 110c2-24 16-38 39-37 18 1 29 14 29 33-10-8-19-13-31-13-12 0-23 6-37 17Z" fill="#253F55"/>
+  <path d="M122 253h24v52h-24zM159 253h24v52h-24z" fill="#234F6A"/>
+  <path d="M112 302h39v10h-39zM152 302h40v10h-40z" rx="5" fill="#183B56"/>
+  <path d="M269 157c0-22 18-40 40-40s40 18 40 40v60h-80v-60Z" fill="url(#shirt)"/>
+  <circle cx="309" cy="101" r="26" fill="#7B493C"/>
+  <path d="M283 102c0-24 14-39 36-39 19 0 31 15 31 35-9-8-18-12-30-12-13 0-24 6-37 16Z" fill="#183B56"/>
+  <path d="m285 211-18 53M333 211l22 48" stroke="#7B493C" stroke-linecap="round" stroke-width="14"/>
+  <path d="M277 215h69v20h-69z" rx="10" fill="#F5B65B"/>
+  <path d="M236 211a56 56 0 1 0 112 0 56 56 0 0 0-112 0Z" stroke="#234F6A" stroke-width="8"/>
+  <path d="m263 212 17 28 17-28M280 240l-8 12" stroke="#79B5CA" stroke-linecap="round" stroke-width="3"/>
+  <path d="M250 180h45" stroke="#234F6A" stroke-linecap="round" stroke-width="7"/>
+  <path d="M260 180v29" stroke="#234F6A" stroke-linecap="round" stroke-width="7"/>
+  <path d="M195 163c16-15 33-15 49 0M186 146c21-21 45-21 67 0" stroke="#fff" stroke-linecap="round" stroke-width="6" opacity=".9"/>
+  <circle cx="94" cy="85" r="5" fill="#D9545D"/>
+  <path d="M390 164v20m-10-10h20" stroke="#D9545D" stroke-linecap="round" stroke-width="4" opacity=".8"/>
+</svg>

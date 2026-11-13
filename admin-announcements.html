@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#2E3192">
+  <meta name="description" content="View community announcements in the e-Gabay PWD admin portal.">
+  <title>Community notices — e-Gabay Marinduque Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="assets/css/styles.css" rel="stylesheet">
+</head>
+<body class="portal-page staff-page">
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header"><nav class="navbar" aria-label="Main navigation"><div class="container">
+    <a class="navbar-brand brand-lockup" href="admin.html" aria-label="Admin dashboard"><span class="brand-mark" aria-hidden="true"><span>e</span></span><span class="brand-text">e-Gabay <span>PWD</span><small>MARINDUQUE</small></span></a>
+    <div class="portal-nav-links"><span class="portal-role-label">ADMIN PORTAL</span><a href="profile.html">My profile</a><a href="login.html">Switch account</a></div>
+  </div></nav></header>
+  <main id="main-content" class="portal-main container">
+    <aside class="admin-sidebar" aria-label="Admin navigation"><span class="admin-sidebar-label">WORKSPACE</span><nav>
+      <a class="admin-sidebar-link" href="admin.html"><span aria-hidden="true">⌂</span> Overview</a>
+      <a class="admin-sidebar-link" href="admin-users.html">Users</a>
+      <a class="admin-sidebar-link" href="admin-requests.html"><span aria-hidden="true">▤</span> Assistance requests</a>
+      <a class="admin-sidebar-link" href="admin-id-requests.html"><span class="admin-id-icon" aria-hidden="true"><svg class="admin-id-icon-svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8" cy="11" r="2"/><path d="M6 16c.5-1.5 3.5-1.5 4 0M13 10h5M13 14h5"/></svg></span> ID applications</a>
+      <a class="admin-sidebar-link" href="admin-announcement-create.html"><span aria-hidden="true">＋</span> Add announcement</a>
+      <a class="admin-sidebar-link active" href="admin-announcements.html" aria-current="page"><span aria-hidden="true">i</span> Community notices</a>
+    </nav><p class="admin-sidebar-note">Manage requests and share updates with your community.</p></aside>
+    <div class="admin-content">
+      <section class="portal-hero staff-hero"><div class="eyebrow"><span class="eyebrow-line"></span> COMMUNITY NOTICES</div><h1>Community <span>announcements.</span></h1><p class="portal-intro">Review notices currently shared with the community.</p></section>
+      <section class="admin-panel" id="admin-announcements">
+        <div class="admin-panel-heading"><div><span class="card-kicker">COMMUNITY NOTICES</span><h2>Announcements</h2></div><a class="btn btn-primary" href="admin-announcement-create.html">Add announcement</a></div>
+        <div class="row g-4" id="announcement-list" aria-live="polite" aria-label="Announcements"></div>
+        <p class="announcement-empty admin-footnote" id="announcement-empty">No announcements have been added yet.</p>
+        <p class="admin-feedback" id="admin-feedback" role="status" aria-live="polite"></p>
+      </section>
+    </div>
+  </main>
+  <script src="assets/js/app.js?v=announcement-delete-1"></script>
+</body>
+</html>

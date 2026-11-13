@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 230" fill="none">
+  <title>Caregiver supporting a loved one</title>
+  <path d="M48 53c37-46 136-50 190-19 53 30 55 113 23 154-36 47-153 39-206 4C8 157 12 99 48 53Z" fill="#FCEDEB" fill-opacity=".85"/>
+  <circle cx="112" cy="83" r="25" fill="#A8654F"/>
+  <path d="M87 82c2-24 17-38 39-36 16 1 26 12 27 31-10-8-21-13-32-13-11 0-22 7-34 18Z" fill="#183B56"/>
+  <path d="M74 144c0-23 17-41 39-41s40 18 40 41v44H74v-44Z" fill="#F5B65B"/>
+  <circle cx="216" cy="92" r="23" fill="#7B493C"/>
+  <path d="M193 91c1-22 15-35 35-33 14 1 23 12 24 29-9-7-18-11-29-11-10 0-20 6-30 15Z" fill="#234F6A"/>
+  <path d="M178 151c0-21 17-38 38-38s38 17 38 38v37h-76v-37Z" fill="#36A0C8"/>
+  <path d="m143 135 20 17 19-17" stroke="#D9545D" stroke-linecap="round" stroke-linejoin="round" stroke-width="9"/>
+  <path d="M161 128c-10-12-27 2 0 22 27-20 10-34 0-22Z" fill="#D9545D"/>
+  <path d="M82 187h190" stroke="#8AC7DD" stroke-linecap="round" stroke-width="5"/>
+  <circle cx="65" cy="74" r="5" fill="#0077B6"/>
+  <path d="M276 50v18m-9-9h18" stroke="#F5B65B" stroke-linecap="round" stroke-width="4"/>
+</svg>
