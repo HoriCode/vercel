@@ -9,12 +9,9 @@
 
 ## Important limitations
 This remains a **partial migration**. The following routes intentionally respond HTTP 501:
-- `assistance_create.php`
-- `id_application_create.php`
-- `profile_picture.php`
-- `document_download.php`
+- `profile_picture.php` (still not implemented)
 
-Do NOT collect real PWD IDs, medical certificates or personal records in this development build. Vercel Functions do not supply persistent local uploads. To finish these features, use authenticated private object storage, server-verified permissions for every download, file size/type validation, malware scanning, and direct uploads appropriate for the platform's payload limits. Do not make document blobs public.
+Do NOT collect real PWD IDs, medical certificates or personal records in this development build. Request and document endpoints now require a connected PRIVATE Vercel Blob store; file validation and ownership checks are implemented, but malware scanning, retention/deletion controls and security review are still required. See REQUEST_AND_DOCUMENT_SETUP.md.
 
 You will need a separately hosted MySQL 8+ database reachable from Vercel, with TLS where available. Your XAMPP `localhost` MySQL will not work from Vercel.
 

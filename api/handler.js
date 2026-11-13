@@ -6,7 +6,7 @@ import { Readable } from 'node:stream';
 
 let pool;
 const allEndpoints = new Set(['login','register','session','logout','profile','password_change','announcements','announcement_create','announcement_delete','notifications','notifications_read','my_history','track','admin_requests','admin_users','admin_assistance_details','admin_id_documents','request_status','my_request','assistance_create','id_application_create','profile_picture','document_download','document_upload']);
-const disabled = new Set(['profile_picture']);
+const disabled = new Set();
 const s = v => String(v ?? '').trim();
 const random = (n=16) => crypto.randomBytes(n).toString('hex');
 const error = (message,status=400) => {let e=new Error(message);e.status=status;throw e;};
@@ -123,7 +123,7 @@ const profileFor = async uid => {
  const row=await first('SELECT u.user_id,u.full_name,u.email,u.contact_number,u.role,u.account_status,p.birth_date,p.sex,p.address_line,p.barangay,p.pwd_id_number,p.disability_type,p.id_valid_until,p.profile_picture,m.municipality_name AS municipality FROM users u LEFT JOIN pwd_profiles p ON p.user_id=u.user_id LEFT JOIN municipalities m ON m.municipality_id=p.municipality_id WHERE u.user_id=?',[uid]);
  if(!row)error('User not found.',404);
  if(row.birth_date){const b=new Date(row.birth_date),now=new Date();row.age=now.getUTCFullYear()-b.getUTCFullYear()-(now.toISOString().slice(5,10)<row.birth_date.slice(5,10)?1:0);}else row.age=null;
- row.profile_picture_url=null;delete row.profile_picture;return row;
+ row.profile_picture_url=row.profile_picture?`api/profile_picture.php?user_id=${Number(uid)}`:null;delete row.profile_picture;return row;
 };
 const trans = async fn => {const db=await connection().getConnection();try{await db.beginTransaction();const r=await fn(db);await db.commit();return r;}catch(e){await db.rollback();throw e;}finally{db.release();}};
 const issueSession = (res,u) => {const csrf=random(32);res.setHeader('Set-Cookie',cookieFor(sign({uid:Number(u.user_id),csrf,exp:Date.now()+7*86400000})));return current(u);};
@@ -163,6 +163,38 @@ async function route(endpoint,req,res,params){
   requireMethod(req,'POST');csrf(req,user);const f=await validateProfile(d);
   await trans(async db=>{await query('UPDATE users SET full_name=?,email=?,contact_number=? WHERE user_id=?',[f.full,f.email,f.contact||null,user.user_id],db);await saveProfile(user.user_id,f,db);await audit(user.user_id,'profile_update','user',user.user_id,null,db);});
   return {success:true,message:'Profile updated.',profile:await profileFor(user.user_id)};
+ }
+ if(endpoint==='profile_picture'){
+  if(req.method==='GET'){
+   const requested=Number(params.get('user_id')||user.user_id);
+   if(!Number.isSafeInteger(requested)||requested<1)error('Invalid user.',422);
+   if(requested!==user.user_id&&!['staff','admin'].includes(user.role))error('You cannot view this profile picture.',403);
+   const picture=await first('SELECT profile_picture FROM pwd_profiles WHERE user_id=?',[requested]);
+   if(!picture?.profile_picture)error('Profile picture not found.',404);
+   // Only allow private objects in the per-user profile-picture prefix.
+   if(!/^profile\/[0-9]+\/[a-f0-9]{24}\.(jpg|png|webp)$/.test(picture.profile_picture)||!picture.profile_picture.startsWith(`profile/${requested}/`))error('Invalid profile picture record.',404);
+   const blob=await get(picture.profile_picture,{access:'private'});
+   if(!blob||blob.statusCode!==200||!blob.stream)error('Profile picture not found in storage.',404);
+   const type=picture.profile_picture.endsWith('.png')?'image/png':picture.profile_picture.endsWith('.webp')?'image/webp':'image/jpeg';
+   res.statusCode=200;res.setHeader('Content-Type',type);res.setHeader('X-Content-Type-Options','nosniff');
+   res.setHeader('Cache-Control','private, no-store');
+   await new Promise((resolve,reject)=>Readable.fromWeb(blob.stream).on('error',reject).pipe(res).on('finish',resolve).on('error',reject));
+   res._egabayStreamed=true;return null;
+  }
+  requireMethod(req,'POST');csrf(req,user);
+  const mime=s(d.mime),data=s(d.base64),allowed=['image/jpeg','image/png','image/webp'];
+  if(!allowed.includes(mime))error('Choose a JPG, PNG or WEBP image.',422);
+  if(!data||data.length>Math.ceil(MAX_UPLOAD*4/3)+16||!/^[A-Za-z0-9+/]+={0,2}$/.test(data))error('Photo must be under 2 MB.',413);
+  const contents=Buffer.from(data,'base64');
+  const webp=contents.length>=12&&contents.toString('ascii',0,4)==='RIFF'&&contents.toString('ascii',8,12)==='WEBP';
+  if(!contents.length||contents.length>MAX_UPLOAD||!(validDocument(contents,mime)||(mime==='image/webp'&&webp)))error('The photo does not match its selected format.',422);
+  const ext=mime==='image/png'?'png':mime==='image/webp'?'webp':'jpg';
+  const pathname=`profile/${user.user_id}/${random(12)}.${ext}`;
+  await put(pathname,contents,{access:'private',contentType:mime,addRandomSuffix:false});
+  // Keep this storage path under the existing VARCHAR(60) database column.
+  await query('INSERT INTO pwd_profiles(user_id,profile_picture) VALUES(?,?) ON DUPLICATE KEY UPDATE profile_picture=VALUES(profile_picture)',[user.user_id,pathname]);
+  await audit(user.user_id,'profile_photo_update','user',user.user_id);
+  return {success:true,message:'Profile picture uploaded successfully.',url:'api/profile_picture.php'};
  }
  if(endpoint==='password_change'){
   requireMethod(req,'POST');csrf(req,user);const old=String(d.current_password||''),next=String(d.new_password||'');

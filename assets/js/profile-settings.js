@@ -64,14 +64,27 @@
   });
   $('picture-form').addEventListener('submit',async event=>{
     event.preventDefault();
+    const button=event.target.querySelector('button[type="submit"]');
+    const feedback=$('picture-feedback');
+    const file=$('picture-file').files?.[0];
+    if(!file){feedback.textContent='Please choose a photo.';return;}
+    if(file.size>2*1024*1024){feedback.textContent='Maximum file size is 2 MB.';return;}
+    if(!['image/jpeg','image/png','image/webp'].includes(file.type)){feedback.textContent='Choose a JPG, PNG or WEBP photo.';return;}
+    button.disabled=true;feedback.textContent='Uploading photo…';
     try{
-      const formData=new FormData();
-      formData.append('picture',$('picture-file').files[0]);
-      const data=await api('api/profile_picture.php',{method:'POST',headers:{'X-CSRF-Token':csrf},body:formData});
-      $('profile-photo').src=data.url+'&v='+Date.now();
-      $('profile-photo').hidden=false;
-      $('picture-feedback').textContent=data.message;
-    }catch(error){$('picture-feedback').textContent=error.message;}
+      const encoded=await new Promise((resolve,reject)=>{
+        const reader=new FileReader();
+        reader.onload=()=>resolve(String(reader.result).split(',')[1]);
+        reader.onerror=()=>reject(new Error('Could not read the selected photo.'));
+        reader.readAsDataURL(file);
+      });
+      const data=await post('api/profile_picture.php',{mime:file.type,base64:encoded});
+      const photo=$('profile-photo');
+      photo.src=data.url+'?v='+Date.now();photo.hidden=false;
+      feedback.textContent=data.message;
+      event.target.reset();
+    }catch(error){feedback.textContent=error.message;}
+    finally{button.disabled=false;}
   });
   load().catch(error=>{$('profile-feedback').textContent=error.message;});
 })();

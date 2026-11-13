@@ -2623,3 +2623,26 @@ textarea:focus-visible {
   .profile-details,
   .profile-detail-group--triple .profile-details { grid-template-columns: minmax(0, 1fr); }
 }
+
+/* Mobile notification and touch-target fix (2026-11) */
+.notification-panel-portal {
+  position: fixed !important;
+  z-index: 2147483000 !important;
+  box-sizing: border-box;
+  max-height: min(65dvh, 440px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  background: #fff;
+  color: #173b52;
+  box-shadow: 0 14px 42px rgba(0, 30, 75, .24);
+}
+.notification-panel-portal[hidden] { display: none !important; }
+.notification-panel-portal .notification-close,
+.portal-page .notification-toggle { min-height: 44px; min-width: 44px; cursor: pointer; }
+@media (max-width: 599px) {
+  .notification-panel-portal { max-height: min(70dvh, 500px); padding: 14px; }
+  .portal-page .portal-nav-links a, .portal-page .portal-section-links a { min-height: 40px; display: inline-flex; align-items: center; }
+  .profile-photo { max-width: 100%; object-fit: cover; }
+  .portal-page button, .portal-page input[type="file"] { touch-action: manipulation; }
+}

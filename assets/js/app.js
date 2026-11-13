@@ -291,12 +291,72 @@
 
   document.querySelectorAll('.filter-pill').forEach(button=>button.addEventListener('click',()=>{document.querySelectorAll('.filter-pill').forEach(p=>{const selected=p===button;p.classList.toggle('active',selected);p.setAttribute('aria-pressed',String(selected));});document.querySelectorAll('.announcement-card').forEach(card=>card.hidden=button.dataset.filter!=='all'&&card.dataset.category!==button.dataset.filter);}));
 
+  // Move the notification panel outside the horizontally scrolling navigation.
+  // On phones its old parent clipped the panel, making it appear empty/invisible.
+  const notificationPanel=$('#notification-panel');
+  const notificationToggle=$('#notification-toggle');
+  if(notificationPanel&&notificationToggle){
+    document.body.appendChild(notificationPanel);
+    notificationPanel.classList.add('notification-panel-portal');
+    notificationPanel.hidden=true;
+  }
+  function positionNotificationPanel(){
+    if(!notificationPanel||!notificationToggle||notificationPanel.hidden)return;
+    const r=notificationToggle.getBoundingClientRect();
+    const mobile=window.innerWidth<600;
+    const width=Math.min(360,window.innerWidth-24);
+    notificationPanel.style.width=width+'px';
+    notificationPanel.style.top=Math.max(8,Math.min(r.bottom+8,window.innerHeight-110))+'px';
+    notificationPanel.style.left=(mobile?Math.max(12,(window.innerWidth-width)/2):Math.max(12,Math.min(r.right-width,window.innerWidth-width-12)))+'px';
+  }
+  function closeNotifications(){
+    if(!notificationPanel)return;
+    notificationPanel.hidden=true;
+    notificationToggle?.setAttribute('aria-expanded','false');
+  }
   async function loadNotifications(){
     const items=$('#notification-items'),count=$('#notification-count');if(!items||!count)return;
-    try{const data=await api('api/notifications.php');items.replaceChildren();data.items.forEach(n=>{const el=document.createElement('article');el.className=`notification-item${Number(n.read)?'':' is-unread'}`;el.innerHTML=`<p class="notification-title">${escapeHtml(n.title)}</p>${n.message?`<p class="notification-message">${escapeHtml(n.message)}</p>`:''}<time>${escapeHtml(new Date(n.createdAt).toLocaleString())}</time>`;items.append(el);});if(data.items.length===0)items.innerHTML='<p class="notification-empty">You’re all caught up.</p>';const unread=data.items.filter(n=>!Number(n.read)).length;count.textContent=unread>99?'99+':String(unread);count.hidden=unread===0;}catch(err){if($('#notification-feedback'))$('#notification-feedback').textContent=err.message;}
+    const feedback=$('#notification-feedback');
+    if(feedback)feedback.textContent='';
+    try{
+      const data=await api('api/notifications.php');
+      items.replaceChildren();
+      data.items.forEach(n=>{
+        const el=document.createElement('article');
+        el.className=`notification-item${Number(n.read)?'':' is-unread'}`;
+        el.innerHTML=`<p class="notification-title">${escapeHtml(n.title)}</p>${n.message?`<p class="notification-message">${escapeHtml(n.message)}</p>`:''}<time>${escapeHtml(n.createdAt ? new Date(String(n.createdAt).replace(' ','T')).toLocaleString() : '')}</time>`;
+        items.append(el);
+      });
+      if(!data.items.length)items.innerHTML='<p class="notification-empty">No notifications yet. New announcements and request updates will appear here.</p>';
+      const unread=data.items.filter(n=>!Number(n.read)).length;
+      count.textContent=unread>99?'99+':String(unread);count.hidden=unread===0;
+      if(notificationToggle)notificationToggle.setAttribute('aria-label',unread?`Notifications, ${unread} unread`:'Notifications');
+    }catch(err){
+      items.innerHTML='<p class="notification-empty">Could not load notifications. Try again.</p>';
+      if(feedback)feedback.textContent=err.message;
+    }
   }
-  $('#notification-toggle')?.addEventListener('click',async()=>{const panel=$('#notification-panel');panel.hidden=!panel.hidden;if(!panel.hidden){await loadNotifications();await fetch('api/notifications_read.php',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':csrfToken}});}});
-  $('#notification-close')?.addEventListener('click',()=>{$('#notification-panel').hidden=true;});
+  notificationToggle?.addEventListener('click',async()=>{
+    if(!notificationPanel)return;
+    if(!notificationPanel.hidden){closeNotifications();return;}
+    notificationPanel.hidden=false;
+    notificationToggle.setAttribute('aria-expanded','true');
+    positionNotificationPanel();
+    await loadNotifications();
+    positionNotificationPanel();
+    try{
+      const result=await fetch('api/notifications_read.php',{method:'POST',credentials:'same-origin',headers:{'X-CSRF-Token':csrfToken}});
+      if(result.ok){$('#notification-count').hidden=true;notificationPanel.querySelectorAll('.is-unread').forEach(el=>el.classList.remove('is-unread'));}
+    }catch{/* notifications still remain visible if read tracking fails */}
+  });
+  $('#notification-close')?.addEventListener('click',closeNotifications);
+  document.addEventListener('click',event=>{
+    if(notificationPanel&&!notificationPanel.hidden&&!notificationPanel.contains(event.target)&&!notificationToggle?.contains(event.target))closeNotifications();
+  });
+  document.addEventListener('keydown',event=>{if(event.key==='Escape')closeNotifications();});
+  window.addEventListener('resize',positionNotificationPanel);
+  window.addEventListener('scroll',positionNotificationPanel,true);
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden&&sessionUser)loadNotifications();});
 
   (async()=>{
     try{await loadSession(); await loadAnnouncements(); await loadNotifications(); await loadAdminRequests();}
